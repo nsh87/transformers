@@ -125,10 +125,12 @@ class TrainerState:
 
     def save_to_json(self, json_path: str):
         """Save the content of this instance in JSON format inside `json_path`."""
-        logger.error('Dorkus')
-        logger.error(dataclasses)
-        logger.error(dataclasses.asdict(self))
-        json_string = json.dumps(dataclasses.asdict(self), indent=2, sort_keys=True, default=to_serializable) + "\n"
+        try:
+            json_string = json.dumps(dataclasses.asdict(self), indent=2, sort_keys=True) + "\n"
+        except:
+            import orjson
+            orjson_bytes = orjson.dumps(dataclasses.asdict(self), indent=2, sort_keys=True) + "\n"
+            json_string = orjson_bytes.decode('utf-8')
         with open(json_path, "w", encoding="utf-8") as f:
             f.write(json_string)
 
