@@ -28,6 +28,37 @@ from .training_args import TrainingArguments
 from .utils import logging
 
 
+import numpy as np
+import json
+from functools import singledispatch
+
+
+@singledispatch
+def to_serializable(val):
+    """Used by default."""
+    return val
+
+
+@to_serializable.register(np.float32)
+def ts_float32(val):
+    """Used if *val* is an instance of numpy.float32."""
+    return float(val)
+
+@to_serializable.register(np.ndarray)
+def ts_ndarray(val):
+    """Used if *val* is an instance of Numpy array."""
+    try:
+        return val.astype('float').tolist()
+    except:
+        pass
+    try:
+        return val.detach().numpy().astype('float').tolist()
+    except:
+        pass
+
+json.dumps({'pi': np.float32(3.1415)}, default=to_serializable)
+
+
 logger = logging.get_logger(__name__)
 
 
@@ -94,10 +125,10 @@ class TrainerState:
 
     def save_to_json(self, json_path: str):
         """Save the content of this instance in JSON format inside `json_path`."""
-        print('Dorkus')
-        print(dataclasses)
-        print(dataclasses.asdict(self))
-        json_string = json.dumps(dataclasses.asdict(self), indent=2, sort_keys=True) + "\n"
+        logger.error('Dorkus')
+        logger.error(dataclasses)
+        logger.error(dataclasses.asdict(self))
+        json_string = json.dumps(dataclasses.asdict(self), indent=2, sort_keys=True, default=to_serializable) + "\n"
         with open(json_path, "w", encoding="utf-8") as f:
             f.write(json_string)
 
