@@ -125,8 +125,22 @@ class TrainerState:
 
     def save_to_json(self, json_path: str):
         """Save the content of this instance in JSON format inside `json_path`."""
+        def iterdict(d):
+            for k, v in d.items():
+                if isinstance(v, dict):
+                    d[k] = iterdict(v)
+                elif isinstance(v, np.floating):
+                    try:
+                        v_convert = v.astype('float').tolist()
+                        d[k] = v_convert
+                    except:
+                        pass
+            return d
+
+        data_cls_td = dataclasses.asdict(self)
+        data_cls_dt = iterdict(data_cls_td)
         try:
-            json_string = json.dumps(dataclasses.asdict(self), indent=2, sort_keys=True) + "\n"
+            json_string = json.dumps(data_cls_td, indent=2, sort_keys=True) + "\n"
         except:
             import orjson
             orjson_bytes = orjson.dumps(dataclasses.asdict(self))
