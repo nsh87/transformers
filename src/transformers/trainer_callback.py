@@ -138,12 +138,12 @@ class TrainerState:
             return d
 
         data_cls_td = dataclasses.asdict(self)
-        data_cls_dt = iterdict(data_cls_td)
+        data_cls_td = iterdict(data_cls_td)
         try:
             json_string = json.dumps(data_cls_td, indent=2, sort_keys=True) + "\n"
         except:
             import orjson
-            orjson_bytes = orjson.dumps(dataclasses.asdict(self))
+            orjson_bytes = orjson.dumps(data_cls_td)
             json_string = orjson_bytes.decode('utf-8') + "\n"
         with open(json_path, "w", encoding="utf-8") as f:
             f.write(json_string)
