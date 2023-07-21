@@ -1,3 +1,6 @@
+## YOU HAVE TO PUT THE WHOLE CLASS HERE B/C RAY FAILS TO PICKLE SUBCLASSES!! ##
+from dataclasses import asdict, dataclass, field, fields
+
 # Copyright 2020 The HuggingFace Team. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -54,6 +57,9 @@ from .utils import (
     requires_backends,
 )
 
+logger = logging.get_logger(__name__)
+log_levels = logging.get_log_levels_dict().copy()
+trainer_log_levels = dict(**log_levels, passive=-1)
 
 if is_torch_available():
     import torch
@@ -79,10 +85,6 @@ if is_sagemaker_mp_enabled():
 
     smp.init()
 
-
-logger = logging.get_logger(__name__)
-log_levels = logging.get_log_levels_dict().copy()
-trainer_log_levels = dict(**log_levels, passive=-1)
 
 
 TORCH_COMPILE_BACKENDS = [
@@ -583,7 +585,6 @@ class TrainingArguments:
 
             Possible choices are `"default"`, `"reduce-overhead"` and `"max-autotune"`.
     """
-
     framework = "pt"
     output_dir: str = field(
         metadata={"help": "The output directory where the model predictions and checkpoints will be written."},
@@ -1101,6 +1102,13 @@ class TrainingArguments:
         },
     )
 
+    # Can put Optimizer custom args here and save in init to self, then access when instantiating Optimizer
+    decay_rate: float = field(default=-0.8, metadata={"help": "Decay rate for Adafactor optimizer."})
+    beta1: float = field(default=1.0, metadata={"help": "Beta1 for Adafactor optimizer."})
+    weight_decay: float = field(default=0.0, metadata={"help": "Weight decay for Adafactor optimizer."})
+    clip_threshold: float = field(default=1.0, metadata={"help": "Clip threshold for Adafactor optimizer."})
+    eps: tuple = field(default=(1e-30, 1e-3), metadata={"help": "Epsilon tuple for Adafactor optimizer."})
+
     def __post_init__(self):
         # Handle --use_env option in torch.distributed.launch (local_rank not passed as an arg then).
         # This needs to happen before any call to self.device or self.n_gpu.
@@ -1402,7 +1410,7 @@ class TrainingArguments:
             # - must be run before the model is created.
             if not is_accelerate_available():
                 raise ValueError("--deepspeed requires Accelerate to be installed: `pip install accelerate`.")
-            from transformers.deepspeed import HfTrainerDeepSpeedConfig
+            from .deepspeed import HfTrainerDeepSpeedConfig
 
             # will be used later by the Trainer
             # note: leave self.deepspeed unmodified in case a user relies on it not to be modified)
@@ -1494,7 +1502,7 @@ class TrainingArguments:
         """
         return timedelta(seconds=self.ddp_timeout)
 
-    @cached_property
+    @property
     def _setup_devices(self) -> "torch.device":
         requires_backends(self, ["torch"])
         logger.info("PyTorch: setting up devices")
@@ -2422,12 +2430,3 @@ class TrainingArguments:
         self.ignore_data_skip = ignore_data_skip
         self.data_seed = sampler_seed
         return self
-
-
-class ParallelMode(Enum):
-    NOT_PARALLEL = "not_parallel"
-    NOT_DISTRIBUTED = "not_distributed"
-    DISTRIBUTED = "distributed"
-    SAGEMAKER_MODEL_PARALLEL = "sagemaker_model_parallel"
-    SAGEMAKER_DATA_PARALLEL = "sagemaker_data_parallel"
-    TPU = "tpu"
