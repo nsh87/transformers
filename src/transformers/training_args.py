@@ -2430,12 +2430,3 @@ class TrainingArguments:
         self.ignore_data_skip = ignore_data_skip
         self.data_seed = sampler_seed
         return self
-
-
-class ParallelMode(Enum):
-    NOT_PARALLEL = "not_parallel"
-    NOT_DISTRIBUTED = "not_distributed"
-    DISTRIBUTED = "distributed"
-    SAGEMAKER_MODEL_PARALLEL = "sagemaker_model_parallel"
-    SAGEMAKER_DATA_PARALLEL = "sagemaker_data_parallel"
-    TPU = "tpu"
