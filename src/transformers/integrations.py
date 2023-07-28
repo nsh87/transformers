@@ -339,6 +339,7 @@ def run_hp_search_ray(trainer, n_trials: int, direction: str, **kwargs) -> BestR
     if hasattr(trainable, "__mixins__"):
         dynamic_modules_import_trainable.__mixins__ = trainable.__mixins__
 
+    kwargs['checkpoint_at_end'] = True
     analysis = ray.tune.run(
         dynamic_modules_import_trainable,
         config=trainer.hp_space(None),
