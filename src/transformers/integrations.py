@@ -339,7 +339,6 @@ def run_hp_search_ray(trainer, n_trials: int, direction: str, **kwargs) -> BestR
     if hasattr(trainable, "__mixins__"):
         dynamic_modules_import_trainable.__mixins__ = trainable.__mixins__
 
-    kwargs['checkpoint_at_end'] = True
     analysis = ray.tune.run(
         dynamic_modules_import_trainable,
         config=trainer.hp_space(None),
@@ -347,6 +346,12 @@ def run_hp_search_ray(trainer, n_trials: int, direction: str, **kwargs) -> BestR
         **kwargs,
     )
     best_trial = analysis.get_best_trial(metric="objective", mode=direction[:3], scope=trainer.args.ray_scope)
+    from ray.air import session
+    try:
+        session.report()
+    except Exception as e:
+        print('Session report at end failed!')
+        print(str(e))
     best_run = BestRun(best_trial.trial_id, best_trial.last_result["objective"], best_trial.config, analysis)
     print('Best run trial ID: {}'.format(best_trial.trial_id))
     print('Best run objective: {}'.format(best_trial.last_result["objective"]))
