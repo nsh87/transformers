@@ -357,6 +357,7 @@ def run_hp_search_ray(trainer, n_trials: int, direction: str, **kwargs) -> BestR
     print('Best run objective: {}'.format(best_trial.last_result["objective"]))
     print('Best run config: {}'.format(best_trial.config))
     print('Ray tune.run `analysis` result: {}'.format(analysis))
+    print('Ray Experiment best trial checkpoint: {}'.format(analysis.best_checkpoint))
           
     if _tb_writer is not None:
         trainer.add_callback(_tb_writer)
