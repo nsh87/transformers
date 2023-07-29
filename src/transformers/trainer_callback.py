@@ -104,8 +104,12 @@ class TrainerState:
     def load_from_json(cls, json_path: str):
         """Create an instance from the content of `json_path`."""
         print('Trying to load JSON: {}'.format(json_path))
-        with open(json_path, "r", encoding="utf-8") as f:
-            text = f.read()
+        try:
+            with open(json_path, "r", encoding="utf-8") as f:
+                text = f.read()
+        except Exception as e:
+            with open(json_path, "rb") as f:
+                text = f.read()
         return cls(**orjson.loads(text))
 
 
