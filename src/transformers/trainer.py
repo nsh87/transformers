@@ -1754,9 +1754,7 @@ class Trainer:
 
         # Check if continuing training from a checkpoint
         if resume_from_checkpoint is not None:
-            if os.path.isfile(os.path.join(resume_from_checkpoint, TRAINER_STATE_NAME)):
-                self.state = TrainerState.load_from_json(os.path.join(resume_from_checkpoint, TRAINER_STATE_NAME))
-            elif resume_from_checkpoint.endswith('.json'):
+            if os.path.isfile(os.path.join(resume_from_checkpoint, TRAINER_STATE_NAME)) or resume_from_checkpoint.endswith('.json'):
                 try:
                     last_chkpnt = os.path.join(resume_from_checkpoint, TRAINER_STATE_NAME)
                     self.state = TrainerState.load_from_json(last_chkpnt)
