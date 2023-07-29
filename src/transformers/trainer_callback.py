@@ -110,7 +110,7 @@ class TrainerState:
         except Exception as e:
             with open(json_path, "rb") as f:
                 text = f.read()
-        return cls(**orjson.loads(text))
+        return cls(**json.loads(text))
 
 
 @dataclass
