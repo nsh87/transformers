@@ -24,6 +24,7 @@ import math
 import os
 import random
 import re
+import six
 import shutil
 import sys
 import time
@@ -1754,7 +1755,7 @@ class Trainer:
 
         # Check if continuing training from a checkpoint
         if resume_from_checkpoint is not None:
-            if os.path.isfile(os.path.join(resume_from_checkpoint, TRAINER_STATE_NAME)) or resume_from_checkpoint.endswith('.json'):
+            if os.path.isfile(os.path.join(resume_from_checkpoint, TRAINER_STATE_NAME)) or isinstance(resume_from_checkpoint, six.string_types):
                 try:
                     last_chkpnt = os.path.join(resume_from_checkpoint, TRAINER_STATE_NAME)
                     self.state = TrainerState.load_from_json(last_chkpnt)
