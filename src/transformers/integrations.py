@@ -352,11 +352,14 @@ def run_hp_search_ray(trainer, n_trials: int, direction: str, **kwargs) -> BestR
     except Exception as e:
         print('Session report at end failed!')
         print(str(e))
-    best_run = BestRun(best_trial.trial_id, best_trial.last_result["objective"], best_trial.config, analysis)
-    print('Best run trial ID: {}'.format(best_trial.trial_id))
-    print('Best run objective: {}'.format(best_trial.last_result["objective"]))
-    print('Best run config: {}'.format(best_trial.config))
-    print('Ray tune.run `analysis` result: {}'.format(analysis))
+    if best_trial:
+        best_run = BestRun(best_trial.trial_id, best_trial.last_result["objective"], best_trial.config, analysis)
+        print('Best run trial ID: {}'.format(best_trial.trial_id))
+        print('Best run objective: {}'.format(best_trial.last_result["objective"]))
+        print('Best run config: {}'.format(best_trial.config))
+        print('Ray tune.run `analysis` result: {}'.format(analysis))
+    else:
+        best_run = None
     try:
         print('Ray Experiment best trial checkpoint: {}'.format(analysis.get_best_checkpoint(best_trial, metric="objective", mode=direction[:3], return_path=True)))
     except Exception as e:
