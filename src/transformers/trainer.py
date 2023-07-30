@@ -1760,7 +1760,6 @@ class Trainer:
                     last_chkpnt = os.path.join(resume_from_checkpoint, TRAINER_STATE_NAME)
                     self.state = TrainerState.load_from_json(last_chkpnt)
                 except Exception as e:
-                    print(str(e))
                     if not os.path.exists(last_chkpnt):
                         print('Path does not exist! Checking parent dir and glob.')
                         parent_dir = os.path.dirname(last_chkpnt)
