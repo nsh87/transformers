@@ -1768,7 +1768,7 @@ class Trainer:
                             print('Found state files in parent dir: {}. Loading first!'.format(state_files))
                         try:
                             self.state = TrainerState.load_from_json(state_files[0])
-                            #resume_from_checkpoint = os.path.dirname(state_files[0])
+                            resume_from_checkpoint = os.path.dirname(state_files[0])
                         except Exception as e:
                             print('Failed to find state files in parent dir. Checking next parent')
                             state_files = glob.glob(os.path.join(os.path.dirname(parent_dir), '**', TRAINER_STATE_NAME), recursive=True)
@@ -1776,7 +1776,7 @@ class Trainer:
                                 print('Found state files in parent dir: {}. Loading first!'.format(state_files))
                             try:
                                 self.state = TrainerState.load_from_json(state_files[0])
-                                #resume_from_checkpoint = os.path.dirname(state_files[0])
+                                resume_from_checkpoint = os.path.dirname(state_files[0])
                             except Exception as e:
                                 print('Failed to find state files in parent dir. Checking next parent')
                                 state_files = glob.glob(os.path.join(os.path.dirname(os.path.dirname(parent_dir)), '**', TRAINER_STATE_NAME), recursive=True)
@@ -1784,14 +1784,14 @@ class Trainer:
                                     print('Found state files in parent dir: {}. Loading first!'.format(state_files))
                                 try:
                                     self.state = TrainerState.load_from_json(state_files[0])
-                                    #resume_from_checkpoint = os.path.dirname(state_files[0])
+                                    resume_from_checkpoint = os.path.dirname(state_files[0])
                                 except Exception as e:
                                     print('Failed to find state files in parent dir. Checking next parent')
                                     state_files = glob.glob(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(parent_dir))), '**', TRAINER_STATE_NAME), recursive=True)
                                     if state_files:
                                         print('Found state files in parent dir: {}. Loading first!'.format(state_files))
                                     self.state = TrainerState.load_from_json(state_files[0])
-                                    #resume_from_checkpoint = os.path.dirname(state_files[0])
+                                    resume_from_checkpoint = os.path.dirname(state_files[0])
             epochs_trained = self.state.global_step // num_update_steps_per_epoch
             if not args.ignore_data_skip:
                 steps_trained_in_current_epoch = self.state.global_step % (num_update_steps_per_epoch)
