@@ -2900,12 +2900,13 @@ class Trainer:
         if self.state.best_model_checkpoint is not None:
             try:
                 best_model_index = checkpoints_sorted.index(str(Path(self.state.best_model_checkpoint)))
+
+                for i in range(best_model_index, len(checkpoints_sorted) - 2):
+                    checkpoints_sorted[i], checkpoints_sorted[i + 1] = checkpoints_sorted[i + 1], checkpoints_sorted[i]
+                print('checkpoints_sorted_next')
+                print(f'{checkpoints_sorted}')
             except Exception as e:
                 print(f'_sorted_checkpoints error{e}')
-            for i in range(best_model_index, len(checkpoints_sorted) - 2):
-                checkpoints_sorted[i], checkpoints_sorted[i + 1] = checkpoints_sorted[i + 1], checkpoints_sorted[i]
-        print('checkpoints_sorted_next')
-        print(f'{checkpoints_sorted}')
         return checkpoints_sorted
 
     def _rotate_checkpoints(self, use_mtime=False, output_dir=None) -> None:
