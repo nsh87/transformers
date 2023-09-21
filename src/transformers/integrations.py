@@ -298,7 +298,7 @@ def run_hp_search_ray(trainer, n_trials: int, direction: str, **kwargs) -> BestR
                 "consider setting `keep_checkpoints_num=1`."
             )
     if "scheduler" in kwargs:
-        from ray.tune.schedulers import ASHAScheduler, HyperBandForBOHB, MedianStoppingRule, PopulationBasedTraining, PB2
+        from ray.tune.schedulers import ASHAScheduler, HyperBandForBOHB, MedianStoppingRule, PopulationBasedTraining
 
         # Check if checkpointing is enabled for PopulationBasedTraining
         if isinstance(kwargs["scheduler"], PopulationBasedTraining):
