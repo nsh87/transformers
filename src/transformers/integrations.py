@@ -231,8 +231,18 @@ def run_hp_search_ray(trainer, n_trials: int, direction: str, **kwargs) -> BestR
         checkpoint = None
         if checkpoint_dir:
             for subdir in os.listdir(checkpoint_dir):
+                logger.info('list of checkpoint_dir')
+                logger.info(str(os.listdir(checkpoint_dir)))
                 if subdir.startswith(PREFIX_CHECKPOINT_DIR):
                     checkpoint = os.path.join(checkpoint_dir, subdir)
+                    # chance added for gcp debug
+                    logger.info('checkpoint_dir')
+                    logger.info(str(checkpoint_dir))
+                    logger.info('subdir')
+                    logger.info(str(subdir))
+                    logger.info('checkpoint')
+                    logger.info(str(checkpoint))
+                    ######################################################
         local_trainer.objective = None
         local_trainer.train(resume_from_checkpoint=checkpoint, trial=trial)
         # If there hasn't been any evaluation during the training loop.
@@ -288,7 +298,7 @@ def run_hp_search_ray(trainer, n_trials: int, direction: str, **kwargs) -> BestR
                 "consider setting `keep_checkpoints_num=1`."
             )
     if "scheduler" in kwargs:
-        from ray.tune.schedulers import ASHAScheduler, HyperBandForBOHB, MedianStoppingRule, PopulationBasedTraining
+        from ray.tune.schedulers import ASHAScheduler, HyperBandForBOHB, MedianStoppingRule, PopulationBasedTraining, PB2
 
         # Check if checkpointing is enabled for PopulationBasedTraining
         if isinstance(kwargs["scheduler"], PopulationBasedTraining):
@@ -346,6 +356,7 @@ def run_hp_search_ray(trainer, n_trials: int, direction: str, **kwargs) -> BestR
         **kwargs,
     )
     best_trial = analysis.get_best_trial(metric="objective", mode=direction[:3], scope=trainer.args.ray_scope)
+    print(f'best trial{best_trial}')
     from ray.air import session
     try:
         session.report()
