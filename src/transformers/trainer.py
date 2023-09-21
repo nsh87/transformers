@@ -2891,9 +2891,11 @@ class Trainer:
                     ordering_and_checkpoint_path.append((int(regex_match.groups()[0]), path))
 
         checkpoints_sorted = sorted(ordering_and_checkpoint_path)
-        checkpoints_sorted = [checkpoint[1] for checkpoint in checkpoints_sorted]
+        print('checkpoints_sorted_initial')
         print(f'{checkpoints_sorted}')
-        print(f'{[type(i) for i in checkpoints_sorted]}')
+        checkpoints_sorted = [checkpoint[1] for checkpoint in checkpoints_sorted]
+        print('checkpoints_sorted')
+        print(f'{checkpoints_sorted}')
         # Make sure we don't delete the best model.
         if self.state.best_model_checkpoint is not None:
             try:
@@ -2902,6 +2904,8 @@ class Trainer:
                 print(f'_sorted_checkpoints error{e}')
             for i in range(best_model_index, len(checkpoints_sorted) - 2):
                 checkpoints_sorted[i], checkpoints_sorted[i + 1] = checkpoints_sorted[i + 1], checkpoints_sorted[i]
+        print('checkpoints_sorted_next')
+        print(f'{checkpoints_sorted}')
         return checkpoints_sorted
 
     def _rotate_checkpoints(self, use_mtime=False, output_dir=None) -> None:
