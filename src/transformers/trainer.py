@@ -1259,10 +1259,11 @@ class Trainer:
         if self.hp_search_backend == HPSearchBackend.OPTUNA:
             import optuna
 
-            trial.report(self.objective, step)
-            if trial.should_prune():
-                self.callback_handler.on_train_end(self.args, self.state, self.control)
-                raise optuna.TrialPruned()
+            if not trial.study._is_multi_objective():
+                trial.report(self.objective, step)
+                if trial.should_prune():
+                    self.callback_handler.on_train_end(self.args, self.state, self.control)
+                    raise optuna.TrialPruned()
         elif self.hp_search_backend == HPSearchBackend.RAY:
             from ray import tune
 
@@ -2325,6 +2326,7 @@ class Trainer:
 
         run_dir = self._get_output_dir(trial=trial)
         output_dir = os.path.join(run_dir, checkpoint_folder)
+        print(f'trainer _save_checkpoint for {trial} : {output_dir}')
         self.save_model(output_dir, _internal_call=True)
         if self.deepspeed:
             # under zero3 model file itself doesn't get saved since it's bogus! Unless deepspeed
@@ -2367,11 +2369,28 @@ class Trainer:
                 torch.save(self.scaler.state_dict(), os.path.join(output_dir, SCALER_NAME))
 
         # Determine the new best metric / best model checkpoint
+
+        def hyperparameter_objective(metrics, metric_to_check):
+            try:
+                m = metrics['objective']['eval_' + metric_to_check][metric_to_check]
+            except:
+                try:
+                    m = metrics['eval_' + metric_to_check][metric_to_check]
+                except:
+                    try:
+                        m = metrics["eval_" + metric_to_check + "/" + metric_to_check]
+                    except:
+                        try:
+                            m = metrics['eval_' + metric_to_check]
+                        except:
+                            m = metrics[metric_to_check]
+            return m
+
+
         if metrics is not None and self.args.metric_for_best_model is not None:
             metric_to_check = self.args.metric_for_best_model
-            if not metric_to_check.startswith("eval_"):
-                metric_to_check = f"eval_{metric_to_check}"
-            metric_value = metrics[metric_to_check]
+            print(f'metric_to_check: {metric_to_check}')
+            metric_value = hyperparameter_objective(metrics, metric_to_check)
 
             operator = np.greater if self.args.greater_is_better else np.less
             if (
@@ -2883,16 +2902,21 @@ class Trainer:
 
         for path in glob_checkpoints:
             if use_mtime:
+                print('mtime _sorted_checkpoints')
                 ordering_and_checkpoint_path.append((os.path.getmtime(path), path))
+                print(f'ordering_and_checkpoint_path: {ordering_and_checkpoint_path}')
             else:
+                print('NOT mtime _sorted_checkpoints')
                 regex_match = re.match(f".*{checkpoint_prefix}-([0-9]+)", path)
                 if regex_match is not None and regex_match.groups() is not None:
                     ordering_and_checkpoint_path.append((int(regex_match.groups()[0]), path))
-
+                    print(f'ordering_and_checkpoint_path: {ordering_and_checkpoint_path}')
         checkpoints_sorted = sorted(ordering_and_checkpoint_path)
         checkpoints_sorted = [checkpoint[1] for checkpoint in checkpoints_sorted]
         # Make sure we don't delete the best model.
         if self.state.best_model_checkpoint is not None:
+            print(f'best_model_checkpoint: {self.state.best_model_checkpoint}')
+            print(f'checkpoints_sorted: {checkpoints_sorted}')
             best_model_index = checkpoints_sorted.index(str(Path(self.state.best_model_checkpoint)))
             for i in range(best_model_index, len(checkpoints_sorted) - 2):
                 checkpoints_sorted[i], checkpoints_sorted[i + 1] = checkpoints_sorted[i + 1], checkpoints_sorted[i]
@@ -2919,6 +2943,8 @@ class Trainer:
 
         number_of_checkpoints_to_delete = max(0, len(checkpoints_sorted) - save_total_limit)
         checkpoints_to_be_deleted = checkpoints_sorted[:number_of_checkpoints_to_delete]
+        print(f'checkpoints_to_be_deleted: {checkpoints_to_be_deleted}')
+        print(f'best_model_checkpoint: {self.state.best_model_checkpoint}')
         for checkpoint in checkpoints_to_be_deleted:
             logger.info(f"Deleting older checkpoint [{checkpoint}] due to args.save_total_limit")
             shutil.rmtree(checkpoint, ignore_errors=True)

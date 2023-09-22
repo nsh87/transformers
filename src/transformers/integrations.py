@@ -234,7 +234,11 @@ def run_hp_search_ray(trainer, n_trials: int, direction: str, **kwargs) -> BestR
                 if subdir.startswith(PREFIX_CHECKPOINT_DIR):
                     checkpoint = os.path.join(checkpoint_dir, subdir)
         local_trainer.objective = None
-        local_trainer.train(resume_from_checkpoint=checkpoint, trial=trial)
+        try:
+            local_trainer.train(resume_from_checkpoint=checkpoint, trial=trial)
+        except Exception as e:
+            print(f'local trainer error:\n{e}')
+            local_trainer.train(resume_from_checkpoint=True, trial=trial)
         # If there hasn't been any evaluation during the training loop.
         if getattr(local_trainer, "objective", None) is None:
             metrics = local_trainer.evaluate()
@@ -243,7 +247,7 @@ def run_hp_search_ray(trainer, n_trials: int, direction: str, **kwargs) -> BestR
             ray.tune.report(objective=local_trainer.objective, **metrics, done=True)
 
     if not trainer._memory_tracker.skip_memory_metrics:
-        from .trainer_utils import TrainerMemoryTracker
+        from ..trainer_utils import TrainerMemoryTracker
 
         logger.warning(
             "Memory tracking for your Trainer is currently "
@@ -346,28 +350,11 @@ def run_hp_search_ray(trainer, n_trials: int, direction: str, **kwargs) -> BestR
         **kwargs,
     )
     best_trial = analysis.get_best_trial(metric="objective", mode=direction[:3], scope=trainer.args.ray_scope)
-    from ray.air import session
-    try:
-        session.report()
-    except Exception as e:
-        print('Session report at end failed!')
-        print(str(e))
-    if best_trial:
-        best_run = BestRun(best_trial.trial_id, best_trial.last_result["objective"], best_trial.config, analysis)
-        print('Best run trial ID: {}'.format(best_trial.trial_id))
-        print('Best run objective: {}'.format(best_trial.last_result["objective"]))
-        print('Best run config: {}'.format(best_trial.config))
-        print('Ray tune.run `analysis` result: {}'.format(analysis))
-    else:
-        best_run = None
-    try:
-        print('Ray Experiment best trial checkpoint: {}'.format(analysis.get_best_checkpoint(best_trial, metric="objective", mode=direction[:3], return_path=True)))
-    except Exception as e:
-        pass
-          
+    best_run = BestRun(best_trial.trial_id, best_trial.last_result["objective"], best_trial.config, analysis)
     if _tb_writer is not None:
         trainer.add_callback(_tb_writer)
     return best_run
+
 
 
 def run_hp_search_sigopt(trainer, n_trials: int, direction: str, **kwargs) -> BestRun:
