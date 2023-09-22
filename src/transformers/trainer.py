@@ -1278,6 +1278,7 @@ class Trainer:
             return
         with tune.checkpoint_dir(step=self.state.global_step) as checkpoint_dir:
             output_dir = os.path.join(checkpoint_dir, f"{PREFIX_CHECKPOINT_DIR}-{self.state.global_step}")
+            print(f'_tune_save_checkpoint: {output_dir}')
             self.save_model(output_dir, _internal_call=True)
             if self.args.should_save:
                 self.state.save_to_json(os.path.join(output_dir, TRAINER_STATE_NAME))

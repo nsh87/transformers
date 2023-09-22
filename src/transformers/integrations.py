@@ -234,6 +234,8 @@ def run_hp_search_ray(trainer, n_trials: int, direction: str, **kwargs) -> BestR
                 if subdir.startswith(PREFIX_CHECKPOINT_DIR):
                     checkpoint = os.path.join(checkpoint_dir, subdir)
         local_trainer.objective = None
+
+        print(f'local_trainer resume_checkpoint: {checkpoint}')
         try:
             local_trainer.train(resume_from_checkpoint=checkpoint, trial=trial)
         except Exception as e:
