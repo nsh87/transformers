@@ -2384,7 +2384,7 @@ class Trainer:
                         try:
                             m = metrics['eval_' + metric_to_check]
                         except:
-                            m = metrics[metric_to_check])
+                            m = metrics[metric_to_check]
                             print(f'metrics {metrics}')
             return m
 
