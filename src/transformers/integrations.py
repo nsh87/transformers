@@ -236,11 +236,11 @@ def run_hp_search_ray(trainer, n_trials: int, direction: str, **kwargs) -> BestR
         local_trainer.objective = None
 
         print(f'local_trainer resume_checkpoint: {checkpoint}')
-        try:
-            local_trainer.train(resume_from_checkpoint=checkpoint, trial=trial)
-        except Exception as e:
-            print(f'local trainer error:\n{e}')
-            local_trainer.train(resume_from_checkpoint=True, trial=trial)
+        #try:
+        local_trainer.train(resume_from_checkpoint=checkpoint, trial=trial)
+        #except Exception as e:
+        #    print(f'local trainer error:\n{e}')
+        #    local_trainer.train(resume_from_checkpoint=True, trial=trial)
         # If there hasn't been any evaluation during the training loop.
         if getattr(local_trainer, "objective", None) is None:
             metrics = local_trainer.evaluate()
