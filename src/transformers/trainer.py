@@ -2890,9 +2890,12 @@ class Trainer:
                     ordering_and_checkpoint_path.append((int(regex_match.groups()[0]), path))
 
         checkpoints_sorted = sorted(ordering_and_checkpoint_path)
+        print(f"Checkpoints: {checkpoints_sorted}")
         checkpoints_sorted = [checkpoint[1] for checkpoint in checkpoints_sorted]
+        print(f"Checkpoints: {checkpoints_sorted}")
         # Make sure we don't delete the best model.
         if self.state.best_model_checkpoint is not None:
+            print(f"Best model checkpoint: {self.state.best_model_checkpoint}")
             best_model_index = checkpoints_sorted.index(str(Path(self.state.best_model_checkpoint)))
             for i in range(best_model_index, len(checkpoints_sorted) - 2):
                 checkpoints_sorted[i], checkpoints_sorted[i + 1] = checkpoints_sorted[i + 1], checkpoints_sorted[i]
