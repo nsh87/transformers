@@ -2384,7 +2384,8 @@ class Trainer:
                         try:
                             m = metrics['eval_' + metric_to_check]
                         except:
-                            m = metrics[metric_to_check]
+                            m = metrics[metric_to_check])
+                            print(f'metrics {metrics}')
             return m
 
 
@@ -2401,7 +2402,7 @@ class Trainer:
             ):
                 self.state.best_metric = metric_value
                 self.state.best_model_checkpoint = output_dir
-
+                print(f'{output_dir} is best model checkpoint so far')
         # Save the Trainer state
         if self.args.should_save:
             self.state.save_to_json(os.path.join(output_dir, TRAINER_STATE_NAME))
