@@ -2968,7 +2968,10 @@ class Trainer:
 
 
                 except Exception as e2:
-                    raise(f'Not a result of pbt exploit: {e2}')
+
+                    print(f'Exception trying to copy other trials checkpoints: {e2}')
+                    raise Exception(f'Not a result of pbt exploit: {e2}')
+                    checkpoints_sorted=[]
             print(f'checkpoints_sorted2: {checkpoints_sorted}')
         return checkpoints_sorted
     def _rotate_checkpoints(self, use_mtime=False, output_dir=None) -> None:
