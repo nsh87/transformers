@@ -349,9 +349,12 @@ def run_hp_search_ray(trainer, n_trials: int, direction: str, **kwargs) -> BestR
         dynamic_modules_import_trainable,
         config=trainer.hp_space(None),
         num_samples=n_trials,
+        #mode=direction[:3],
+        #metric="objective",
         **kwargs,
     )
     best_trial = analysis.get_best_trial(metric="objective", mode=direction[:3], scope=trainer.args.ray_scope)
+    #best_check = analysis.best_checkpoint(scope=trainer.args.ray_scope)
     best_run = BestRun(best_trial.trial_id, best_trial.last_result["objective"], best_trial.config, analysis)
     if _tb_writer is not None:
         trainer.add_callback(_tb_writer)

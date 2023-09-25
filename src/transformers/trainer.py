@@ -2918,12 +2918,26 @@ class Trainer:
         # Make sure we don't delete the best model.
         if self.state.best_model_checkpoint is not None:
             print(f'best_model_checkpoint: {self.state.best_model_checkpoint}')
-            print(f'checkpoints_sorted: {checkpoints_sorted}')
-            best_model_index = checkpoints_sorted.index(str(Path(self.state.best_model_checkpoint)))
-            for i in range(best_model_index, len(checkpoints_sorted) - 2):
-                checkpoints_sorted[i], checkpoints_sorted[i + 1] = checkpoints_sorted[i + 1], checkpoints_sorted[i]
+            print(f'checkpoints_sorted1: {checkpoints_sorted}')
+            try:
+                best_model_index = checkpoints_sorted.index(str(Path(self.state.best_model_checkpoint)))
+                for i in range(best_model_index, len(checkpoints_sorted) - 2):
+                    checkpoints_sorted[i], checkpoints_sorted[i + 1] = checkpoints_sorted[i + 1], checkpoints_sorted[i]
+            except Exception as e:
+                print(e)
+                try:
+                    for checkpoint in checkpoints_sorted:
+                        logger.info(f"Deleting older checkpoint [{checkpoint}] due to possible pbt exploit")
+                        shutil.rmtree(checkpoint, ignore_errors=True)
+                    exploit_src = os.path.dirname(self.state.best_model_checkpoint)
+                    exploit_dest = os.path.dirname(checkpoints_sorted[0])
+                    shutil.copytree(exploit_src, exploit_dest)
+                    exploit_dest_best_checkpoint = os.path.join(exploit_dest, os.path.basename(self.state.best_model_checkpoint))
+                    self.state.best_model_checkpoint = exploit_dest_best_checkpoint
+                except Exeption as e2:
+                    raise(f'Not a result of pbt exploit: {e2}')
+            print(f'checkpoints_sorted2: {checkpoints_sorted}')
         return checkpoints_sorted
-
     def _rotate_checkpoints(self, use_mtime=False, output_dir=None) -> None:
         if self.args.save_total_limit is None or self.args.save_total_limit <= 0:
             return
