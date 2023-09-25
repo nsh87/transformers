@@ -2967,7 +2967,7 @@ class Trainer:
 
 
 
-                except Exeption as e2:
+                except Exception as e2:
                     raise(f'Not a result of pbt exploit: {e2}')
             print(f'checkpoints_sorted2: {checkpoints_sorted}')
         return checkpoints_sorted
