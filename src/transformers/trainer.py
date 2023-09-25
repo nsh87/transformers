@@ -2935,6 +2935,8 @@ class Trainer:
                     logger.info(f"{exploit_dest} is possible pbt exploit destination")
                     print(f"[{exploit_src}] is possible pbt exploit source")
                     print(f"{exploit_dest} is possible pbt exploit destination")
+                    if os.path.exists(exploit_dest):
+                        shutil.rmtree(exploit_dest)
                     shutil.copytree(exploit_src, exploit_dest)
                     exploit_dest_best_checkpoint = os.path.join(exploit_dest, os.path.basename(self.state.best_model_checkpoint))
                     self.state.best_model_checkpoint = exploit_dest_best_checkpoint
