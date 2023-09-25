@@ -2931,9 +2931,14 @@ class Trainer:
                         shutil.rmtree(checkpoint, ignore_errors=True)
                     exploit_src = os.path.dirname(self.state.best_model_checkpoint)
                     exploit_dest = os.path.dirname(checkpoints_sorted[0])
+                    logger.info(f"[{exploit_srct}] is possible pbt exploit source")
+                    logger.info(f"{exploit_dest} is possible pbt exploit destination")
+                    print(f"[{exploit_srct}] is possible pbt exploit source")
+                    print(f"{exploit_dest} is possible pbt exploit destination")
                     shutil.copytree(exploit_src, exploit_dest)
                     exploit_dest_best_checkpoint = os.path.join(exploit_dest, os.path.basename(self.state.best_model_checkpoint))
                     self.state.best_model_checkpoint = exploit_dest_best_checkpoint
+                    print(f"new self.state_best_model_checkpoint: {self.state.best_model_checkpoint}")
                     glob_checkpoints = [str(x) for x in Path(output_dir).glob(f"{checkpoint_prefix}-*") if os.path.isdir(x)]
 
 
