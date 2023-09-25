@@ -2934,6 +2934,39 @@ class Trainer:
                     shutil.copytree(exploit_src, exploit_dest)
                     exploit_dest_best_checkpoint = os.path.join(exploit_dest, os.path.basename(self.state.best_model_checkpoint))
                     self.state.best_model_checkpoint = exploit_dest_best_checkpoint
+                    glob_checkpoints = [str(x) for x in Path(output_dir).glob(f"{checkpoint_prefix}-*") if os.path.isdir(x)]
+
+
+                    for path in glob_checkpoints:
+                        if use_mtime:
+                            print('mtime _sorted_checkpoints')
+                            ordering_and_checkpoint_path.append((os.path.getmtime(path), path))
+                            print(f'ordering_and_checkpoint_path: {ordering_and_checkpoint_path}')
+                        else:
+                            print('NOT mtime _sorted_checkpoints')
+                            regex_match = re.match(f".*{checkpoint_prefix}-([0-9]+)", path)
+                            if regex_match is not None and regex_match.groups() is not None:
+                                ordering_and_checkpoint_path.append((int(regex_match.groups()[0]), path))
+                                print(f'ordering_and_checkpoint_path: {ordering_and_checkpoint_path}')
+                    checkpoints_sorted = sorted(ordering_and_checkpoint_path)
+                    checkpoints_sorted = [checkpoint[1] for checkpoint in checkpoints_sorted]
+                    # Make sure we don't delete the best model.
+                    if self.state.best_model_checkpoint is not None:
+                        print(f'best_model_checkpoint: {self.state.best_model_checkpoint}')
+                        print(f'checkpoints_sorted1: {checkpoints_sorted}')
+
+                        best_model_index = checkpoints_sorted.index(str(Path(self.state.best_model_checkpoint)))
+                        for i in range(best_model_index, len(checkpoints_sorted) - 2):
+                            checkpoints_sorted[i], checkpoints_sorted[i + 1] = checkpoints_sorted[i + 1], checkpoints_sorted[i]
+
+
+
+
+
+
+
+
+
                 except Exeption as e2:
                     raise(f'Not a result of pbt exploit: {e2}')
             print(f'checkpoints_sorted2: {checkpoints_sorted}')
